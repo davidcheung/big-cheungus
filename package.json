@@ -1,0 +1,20 @@
+{
+  "name": "big-cheungus",
+  "version": "0.0.1",
+  "description": "Basically promise.all, but you can control how many runs at once",
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest ."
+  },
+  "author": "David Cheung",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^24.8.0"
+  },
+  "dependencies": {
+    "debug": "^4.1.1"
+  }
+}
