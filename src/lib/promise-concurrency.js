@@ -1,6 +1,12 @@
 const debug = require('debug')('promise-concurrency:');
 
 class PromiseConcurrency {
+  static async PromiseFulfillAll(arrOfPromises, options = {}) {
+    const inst = new PromiseConcurrency(options);
+    inst.pushArr(arrOfPromises);
+    return inst.results();
+  }
+
   constructor(options = {}) {
     this.pending = 0;
     this.running = 0;
@@ -24,6 +30,12 @@ class PromiseConcurrency {
     this.pending++;
     this.jobs.push(job);
     this.dequeue();
+  }
+
+  pushArr(arrOfFn) {
+    arrOfFn.forEach((fn) => {
+      this.push(fn);
+    });
   }
 
   getJobByStatus(status) {
@@ -62,16 +74,15 @@ class PromiseConcurrency {
   }
 
   run(job) {
-    const self = this;
-    if (self.shouldDequeue()) {
+    if (this.shouldDequeue()) {
       this._jobStarted();
       debug(`count: ${this.count++}, running: ${this.running}`);
       delete job.status;
       job
         .fn()
-        .then((res) => this._jobFinished.apply(self, [res]))
+        .then((res) => this._jobFinished.apply(this, [res]))
         .then((res) => {
-          self.res.push(res);
+          this.res.push(res);
           return job;
         })
         .catch((e) => {
@@ -82,19 +93,18 @@ class PromiseConcurrency {
   }
 
   results() {
-    const self = this;
     const { dequeueFrequency } = this.options;
 
     return new Promise((resolve, reject) => {
       try {
         const interval = setInterval(() => {
-          const done = self.pending === 0 && self.running === 0;
+          const done = this.pending === 0 && this.running === 0;
           if (done) {
             clearInterval(interval);
             debug('Resolved promises');
-            return resolve(self.res);
+            return resolve(this.res);
           }
-          self.dequeue();
+          this.dequeue();
         }, dequeueFrequency);
       } catch (e) {
         reject(e);
