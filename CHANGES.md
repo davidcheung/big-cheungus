@@ -1,5 +1,7 @@
-2019-06-04, Version 0.0.4
+2019-06-04, Version 0.0.5
 =========================
+
+ * add test folder (David Cheung)
 
  * add readme on how to use (David Cheung)
 
