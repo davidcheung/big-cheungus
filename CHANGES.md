@@ -1,3 +1,11 @@
+2019-06-06, Version 0.0.7
+=========================
+
+ * added new map-type signature (David Cheung)
+
+ * center cheungus (David Cheung)
+
+
 2019-06-04, Version 0.0.6
 =========================
 
