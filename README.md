@@ -71,3 +71,31 @@ urls.forEach((url) => {
 });
 const results = await promiseQueue.results();
 ```
+
+### Map(ish) signiature
+```js
+  const { promiseMap } = require('big-cheungus');
+
+  const paginate = (page)=> `http://example.com/${page}`;
+  const urls = [1, 2, 3, 4, 5].map(paginate);
+  const results promiseMap(urls, async (url) => request(url, {json : true}));
+```
+
+### Extending the Array.prototype
+```js
+  const { promiseMap } = require('big-cheungus');
+  Array.prototype.bigCheungus = function(...args) {
+    return promiseMap.apply(this, [this, ...args]);
+  };
+
+  const paginate = (page)=> `http://example.com/${page}`;
+  const urls = [1, 2, 3, 4, 5].map(paginate);
+  const results = urls.bigCheungus(async (url) => request(url, {json : true}));
+
+  // or if you want concurrency
+  const concurrencyOptions = {concurrency: 2};
+  const results = urls.bigCheungus(
+    async (url) => request(url, {json : true}),
+    concurrencyOptions
+  );
+```

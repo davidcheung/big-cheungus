@@ -75,6 +75,39 @@ describe('functional', () => {
     const expectedResult = [...new Array(10)].fill('big-cheungus');
     expect(results).toEqual(expectedResult);
   });
+
+  it('PromiseMap: await-able static method', async () => {
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = await PromiseConcurrency.promiseMap(arr, async (item) => {
+      await sleep(30);
+      return item;
+    });
+    expect(results).toEqual(arr);
+  });
+
+  Array.prototype.bigCheungus = function(...args) {
+    return PromiseConcurrency.promiseMap.apply(this, [this, ...args]);
+  };
+
+  it('Array Prototype', async () => {
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = await arr.bigCheungus(async (item) => {
+      return item;
+    });
+    expect(results).toEqual(arr);
+  });
+
+  it('Array Prototype: with options', async () => {
+    const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const results = await arr.bigCheungus(
+      async (item) => {
+        await sleep(30);
+        return item;
+      },
+      { concurrency: 2 },
+    );
+    expect(results).toEqual(arr);
+  });
 });
 
 function sleep(time) {

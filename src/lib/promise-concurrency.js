@@ -7,6 +7,14 @@ class PromiseConcurrency {
     return inst.results();
   }
 
+  static async promiseMap(arr, fn, options = {}) {
+    const inst = new PromiseConcurrency(options);
+    arr.forEach((...args) => {
+      inst.push(async () => fn(...args));
+    });
+    return inst.results();
+  }
+
   constructor(options = {}) {
     this.pending = 0;
     this.running = 0;
@@ -83,6 +91,7 @@ class PromiseConcurrency {
         .then((res) => this._jobFinished.apply(this, [res]))
         .then((res) => {
           this.res.push(res);
+          delete job.fn;
           return job;
         })
         .catch((e) => {
