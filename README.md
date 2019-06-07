@@ -78,7 +78,7 @@ const results = await promiseQueue.results();
 
   const paginate = (page)=> `http://example.com/${page}`;
   const urls = [1, 2, 3, 4, 5].map(paginate);
-  const results promiseMap(urls, async (url) => request(url, {json : true}));
+  const results = await promiseMap(urls, async (url) => request(url, {json : true}));
 ```
 
 ### Extending the Array.prototype
@@ -90,11 +90,11 @@ const results = await promiseQueue.results();
 
   const paginate = (page)=> `http://example.com/${page}`;
   const urls = [1, 2, 3, 4, 5].map(paginate);
-  const results = urls.bigCheungus(async (url) => request(url, {json : true}));
+  const results = await urls.bigCheungus(async (url) => request(url, {json : true}));
 
   // or if you want concurrency
   const concurrencyOptions = {concurrency: 2};
-  const results = urls.bigCheungus(
+  const results = await urls.bigCheungus(
     async (url) => request(url, {json : true}),
     concurrencyOptions
   );
