@@ -1,6 +1,6 @@
 {
   "name": "big-cheungus",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Basically promise.all, but you can control how many runs at once",
   "engines": {
     "node": ">=10.0.0"

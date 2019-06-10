@@ -1,3 +1,9 @@
+2019-06-10, Version 0.0.9
+=========================
+
+ * move linting to dev-dependency (David Cheung)
+
+
 2019-06-10, Version 0.0.8
 =========================
 
