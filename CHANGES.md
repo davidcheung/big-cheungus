@@ -1,3 +1,11 @@
+2019-06-10, Version 0.0.8
+=========================
+
+ * add keywords to package.json (David Cheung)
+
+ * typos on readme (David Cheung)
+
+
 2019-06-06, Version 0.0.7
 =========================
 

@@ -1,6 +1,6 @@
 {
   "name": "big-cheungus",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Basically promise.all, but you can control how many runs at once",
   "engines": {
     "node": ">=10.0.0"
@@ -29,5 +29,11 @@
     "type": "git",
     "url": "https://github.com/davidcheung/big-cheungus"
   },
-  "keywords": ["promise", "promise concurrency", "promise limit", "flow control", "promise all"]
+  "keywords": [
+    "promise",
+    "promise concurrency",
+    "promise limit",
+    "flow control",
+    "promise all"
+  ]
 }
