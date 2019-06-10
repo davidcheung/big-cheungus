@@ -28,5 +28,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/davidcheung/big-cheungus"
-  }
+  },
+  "keywords": ["promise", "promise concurrency", "promise limit", "flow control", "promise all"]
 }
