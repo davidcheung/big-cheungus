@@ -40,22 +40,6 @@ describe('functional', () => {
     expect(results).toEqual(expectedResult);
   });
 
-  it('torrelate error in promises', async () => {
-    const pc = new PromiseConcurrency();
-    [...new Array(99)].map(() => {
-      pc.push(async () => {
-        return 234;
-      });
-    });
-    pc.push(async () => {
-      throw new Error('has error');
-    });
-    const results = await pc.results();
-    expect(results.length).toBe(99);
-    const expectedResult = [...new Array(99)].fill(234);
-    expect(results).toEqual(expectedResult);
-  });
-
   it('PromiseFulfillAll: await-able static method', async () => {
     const promises = [...new Array(10)].map(() => async () => {
       await sleep(50);
@@ -107,6 +91,60 @@ describe('functional', () => {
       { concurrency: 2 },
     );
     expect(results).toEqual(arr);
+  });
+
+  it('autoStart: true', async () => {
+    const pc = new PromiseConcurrency({ autoStart: true });
+    const mockFunction = jest.fn(() => 'start');
+    pc.push(async () => {
+      return mockFunction();
+    });
+    expect(mockFunction).toBeCalledTimes(1);
+    const results = await pc.results();
+    expect(results.length).toBe(1);
+    expect(results).toEqual(['start']);
+  });
+
+  it('autoStart: false', async () => {
+    const pc = new PromiseConcurrency({ autoStart: false });
+    const mockFunction = jest.fn(() => 'dont start');
+    pc.push(async () => {
+      return mockFunction();
+    });
+    expect(mockFunction).toBeCalledTimes(0);
+    const results = await pc.results();
+    expect(results.length).toBe(1);
+    expect(results).toEqual(['dont start']);
+  });
+});
+
+describe('error handling', () => {
+  it('default: tolerate error in promises', async () => {
+    const pc = new PromiseConcurrency();
+    [...new Array(99)].map(() => {
+      pc.push(async () => {
+        return 234;
+      });
+    });
+    pc.push(async () => {
+      throw new Error('has error');
+    });
+    const results = await pc.results();
+    expect(results.length).toBe(99);
+    const expectedResult = [...new Array(99)].fill(234);
+    expect(results).toEqual(expectedResult);
+  });
+
+  it('onError handler: to throw', async () => {
+    const pc = new PromiseConcurrency({
+      onError: (e) => {
+        throw new Error('Error occurred: ' + e.message);
+      },
+    });
+    pc.push(async () => {
+      throw new Error('has error');
+    });
+    expect(pc.results()).rejects.toEqual('Error occurred: has error');
   });
 });
 

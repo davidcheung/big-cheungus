@@ -16,18 +16,21 @@ class PromiseConcurrency {
   }
 
   constructor(options = {}) {
+    this.jobs = [];
+    this.res = [];
     this.pending = 0;
     this.running = 0;
     this.count = 0;
+    this.errorCount = 0;
+
     this.options = {
       concurrency: 5,
       dequeueFrequency: 50,
-      maxRetries: 50,
-      streamResults: false,
+      onError: this.noOpt,
+      throwOnError: false,
+      autoStart: true,
       ...options,
     };
-    this.jobs = [];
-    this.res = [];
   }
 
   push(fn) {
@@ -37,7 +40,7 @@ class PromiseConcurrency {
     };
     this.pending++;
     this.jobs.push(job);
-    this.dequeue();
+    this.options.autoStart && this.dequeue();
   }
 
   pushArr(arrOfFn) {
@@ -63,7 +66,12 @@ class PromiseConcurrency {
   dequeue() {
     const toDo = this.jobs.splice(0, this.availableSlots());
     toDo.forEach((job) => {
-      this.run.apply(this, [job]);
+      this.run.apply(this, [job]).catch((e) => {
+        if (this.options.throwOnError) {
+          throw new Error('Aborted promises due to error');
+        }
+        this.options.onError(e, job);
+      });
     });
   }
 
@@ -86,7 +94,7 @@ class PromiseConcurrency {
       this._jobStarted();
       debug(`count: ${this.count++}, running: ${this.running}`);
       delete job.status;
-      job
+      return job
         .fn()
         .then((res) => this._jobFinished.apply(this, [res]))
         .then((res) => {
@@ -96,17 +104,25 @@ class PromiseConcurrency {
         })
         .catch((e) => {
           this.running--;
+          this.errorCount++;
+          this.options.onError(e, job);
           console.error(e);
         });
     }
+    return Promise.resolve();
   }
 
   results() {
     const { dequeueFrequency } = this.options;
 
     return new Promise((resolve, reject) => {
+      let interval;
       try {
-        const interval = setInterval(() => {
+        interval = setInterval(() => {
+          if (this.options.throwOnError && this.errorCount) {
+            clearInterval(interval);
+            reject('Aborted promises due to error');
+          }
           const done = this.pending === 0 && this.running === 0;
           if (done) {
             clearInterval(interval);
@@ -116,10 +132,13 @@ class PromiseConcurrency {
           this.dequeue();
         }, dequeueFrequency);
       } catch (e) {
+        clearInterval(interval);
         reject(e);
       }
     });
   }
+
+  noOpt() {}
 }
 
 module.exports = PromiseConcurrency;
