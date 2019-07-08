@@ -1,3 +1,9 @@
+2019-07-08, Version 0.0.10
+==========================
+
+ * add error handling and autoStart option (David Cheung)
+
+
 2019-06-10, Version 0.0.9
 =========================
 
