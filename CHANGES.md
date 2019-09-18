@@ -1,3 +1,9 @@
+2019-09-18, Version 0.1.0
+=========================
+
+ * emit event when job done and error (David Cheung)
+
+
 2019-07-08, Version 0.0.10
 ==========================
 
