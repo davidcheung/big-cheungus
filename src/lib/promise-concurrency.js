@@ -1,6 +1,7 @@
+const EventEmitter = require('events');
 const debug = require('debug')('promise-concurrency:');
 
-class PromiseConcurrency {
+class PromiseConcurrency extends EventEmitter {
   static async PromiseFulfillAll(arrOfPromises, options = {}) {
     const inst = new PromiseConcurrency(options);
     inst.pushArr(arrOfPromises);
@@ -16,6 +17,7 @@ class PromiseConcurrency {
   }
 
   constructor(options = {}) {
+    super();
     this.jobs = [];
     this.res = [];
     this.pending = 0;
@@ -89,6 +91,15 @@ class PromiseConcurrency {
     return res;
   }
 
+  _emitDefault() {
+    return {
+      pending: this.pending,
+      running: this.running,
+      count: this.count,
+      errorCount: this.errorCount,
+    };
+  }
+
   run(job) {
     if (this.shouldDequeue()) {
       this._jobStarted();
@@ -98,6 +109,7 @@ class PromiseConcurrency {
         .fn()
         .then((res) => this._jobFinished.apply(this, [res]))
         .then((res) => {
+          this.emit('data', res, this._emitDefault());
           this.res.push(res);
           delete job.fn;
           return job;
@@ -105,6 +117,7 @@ class PromiseConcurrency {
         .catch((e) => {
           this.running--;
           this.errorCount++;
+          this.emit('error', e, this._emitDefault());
           this.options.onError(e, job);
           console.error(e);
         });

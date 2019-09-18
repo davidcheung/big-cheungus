@@ -40,6 +40,44 @@ describe('functional', () => {
     expect(results).toEqual(expectedResult);
   });
 
+  it('emits events', async () => {
+    const pc = new PromiseConcurrency({ concurrency: 10 });
+    [...new Array(100)].map(() => {
+      pc.push(async () => {
+        return 234;
+      });
+    });
+    let count = 0;
+    pc.on('data', (res, metrics) => {
+      expect(metrics).toHaveProperty('pending');
+      count += res;
+    });
+    const results = await pc.results();
+    expect(results.length).toBe(100);
+    expect(count).toBe(234*100);
+    const expectedResult = [...new Array(100)].fill(234);
+    expect(results).toEqual(expectedResult);
+  });
+
+  it('emits events should have metrics', async () => {
+    const pc = new PromiseConcurrency({ concurrency: 10 });
+    [...new Array(100)].map(() => {
+      pc.push(async () => {
+        return 234;
+      });
+    });
+    pc.on('data', (res, metrics) => {
+      expect(metrics).toHaveProperty('pending');
+      expect(metrics).toHaveProperty('running');
+      expect(metrics).toHaveProperty('count');
+      expect(metrics).toHaveProperty('errorCount');
+    });
+    const results = await pc.results();
+    expect(results.length).toBe(100);
+    const expectedResult = [...new Array(100)].fill(234);
+    expect(results).toEqual(expectedResult);
+  });
+
   it('PromiseFulfillAll: await-able static method', async () => {
     const promises = [...new Array(10)].map(() => async () => {
       await sleep(50);
@@ -135,8 +173,9 @@ describe('error handling', () => {
     expect(results).toEqual(expectedResult);
   });
 
-  it('onError handler: to throw', async () => {
+  it('onError handler: to throw', async (done) => {
     const pc = new PromiseConcurrency({
+      autoStart: false,
       onError: (e) => {
         throw new Error('Error occurred: ' + e.message);
       },
@@ -145,6 +184,22 @@ describe('error handling', () => {
       throw new Error('has error');
     });
     expect(pc.results()).rejects.toEqual('Error occurred: has error');
+    done();
+  });
+
+  it('emits error', async () => {
+    const pc = new PromiseConcurrency({
+      onError: () => {},
+    });
+    pc.push(async () => {
+      throw new Error('unique error');
+    });
+    let capturedError;
+    pc.on('error', (e) => {
+      capturedError = e.message;
+    });
+    await pc.results();
+    expect(capturedError).toBe('unique error');
   });
 });
 
